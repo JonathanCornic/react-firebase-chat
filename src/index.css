@@ -5,3 +5,45 @@
   font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande",
     "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
 }
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background-color: rgba(17, 25, 40, 0.75);
+  border-radius: 5px;
+}
+
+body {
+  background-image: url("/bg.webp");
+  background-size: cover;
+  backdrop-filter: blur(19px) saturate(180%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  color: white;
+  overflow: hidden;
+}
+
+.container {
+  width: 90vw;
+  height: 90vh;
+  border-radius: 12px;
+  background-color: rgba(17, 25, 40, 0.75);
+  backdrop-filter: blur(19px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.125);
+  display: flex;
+}
+
+
+/* emoji-picker rules, using in chat.css */
+:root {
+  .EmojiPickerReact {
+    --epr-emoji-size: 20px;
+    --epr-hover-bg-color: #111928bf;
+    --epr-category-label-bg-color: #111928bf;
+    --epr-text-color: #a5a5a5;
+    --epr-picker-border-color: #dddddd35;
+  }
+}
