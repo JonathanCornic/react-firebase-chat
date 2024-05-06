@@ -41,8 +41,8 @@ body {
 :root {
   .EmojiPickerReact {
     --epr-emoji-size: 20px;
-    --epr-hover-bg-color: #111928bf;
-    --epr-category-label-bg-color: #111928bf;
+    --epr-hover-bg-color: #2aa4a43b;
+    --epr-category-label-bg-color: #2aa4a43b;
     --epr-text-color: #a5a5a5;
     --epr-picker-border-color: #dddddd35;
   }

@@ -145,10 +145,11 @@
         left: 0;
 
         .emojiPicker {
-          background-color: rgba(17, 25, 40, 0.5);
+          background-color: rgba(17, 25, 40);
 
           input {
             padding-left: 40px;
+            background-color: #2aa4a43b;
           }
           ::-webkit-scrollbar {
             width: 0px;
