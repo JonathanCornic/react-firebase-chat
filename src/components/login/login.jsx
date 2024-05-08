@@ -42,7 +42,7 @@ export default function Login() {
         id: res.user.uid,
         blocked: [],
       });
-      await setDoc(doc(db, "userchats", res.user.uid), {
+      await setDoc(doc(db, "userChats", res.user.uid), {
         chats: [],
       });
       toast.success("Acount created!");
