@@ -39,19 +39,19 @@ export default function AddUser() {
 
   async function handleAdd() {
     const chatRef = collection(db, "chats");
-    const userChatsRef = collection(db, "userChats");
+    const userChatsRef = collection(db, "userchats");
 
     try {
       const newChatRef = doc(chatRef);
       await setDoc(newChatRef, {
         createAt: serverTimestamp(),
-        message: [],
+        messages: [],
       });
       await updateDoc(doc(userChatsRef, user.id), {
         chats:arrayUnion({
           chatId: newChatRef.id,
           lastMessage: "",
-          receveredId: currentUser.id,
+          receiveredId: currentUser.id,
           updatedAt: Date.now(),
         }),
       });
@@ -60,7 +60,7 @@ export default function AddUser() {
         chats: arrayUnion({
           chatId: newChatRef.id,
           lastMessage: "",
-          receveredId: user.id,
+          receiveredId: user.id,
           updatedAt: Date.now(),
         }),
       });

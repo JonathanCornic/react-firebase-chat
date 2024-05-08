@@ -1,13 +1,24 @@
 import EmojiPicker from "emoji-picker-react";
-import { doc, onSnapshot } from "firebase/firestore";
+import {
+  arrayUnion,
+  doc,
+  getDoc,
+  onSnapshot,
+  updateDoc,
+} from "firebase/firestore";
 import { useEffect, useRef, useState } from "react";
 import { db } from "../../lib/firebase/firebase";
+import { useChatStore } from "../../lib/zustand/chat-store";
+import { useUserStore } from "../../lib/zustand/user-store";
 import "./chat.css";
 
 export default function Chat() {
   const [open, setOpen] = useState(false);
   const [chat, setChat] = useState();
   const [text, setText] = useState("");
+
+  const { currentUser } = useUserStore();
+  const { chatId, user } = useChatStore();
 
   const endRef = useRef(null);
 
@@ -16,22 +27,55 @@ export default function Chat() {
   }, []);
 
   useEffect(() => {
-    const unSub = onSnapshot(
-      doc(db, "chats", "ujrFGi8ST7bpHDSPCqmD"),
-      (res) => {
-        setChat(res.data());
+    const unSub = onSnapshot(doc(db, "chats", chatId), (res) => {
+      setChat(res.data());
 
-        return () => {
-          unSub();
-        };
-      }
-    );
-  }, []);
+      return () => {
+        unSub();
+      };
+    });
+  }, [chatId]);
   console.log(chat);
 
   function handleEmoji(e) {
     setText((prev) => prev + e.emoji);
     setOpen(false);
+  }
+
+  async function handleSend() {
+    if (text === "") return;
+    try {
+      await updateDoc(doc(db, "chats", chatId), {
+        messages: arrayUnion({
+          senderId: currentUser.id,
+          text,
+          createAt: new Date(),
+        }),
+      });
+      const userIDs = [currentUser.id, user.id];
+      userIDs.forEach(async (id) => {
+        const userChatRef = doc(db, "userchats", id);
+        const userChatSnapShot = await getDoc(userChatRef);
+
+        if (userChatSnapShot.exists()) {
+          const userChatsData = userChatSnapShot.data();
+
+          const chatIndex = userChatsData.chats.findIndex(
+            (c) => c.chatId === chatId
+          );
+          userChatsData.chats[chatIndex].lastMessage = text;
+          userChatsData.chats[chatIndex].isSeen =
+            id === currentUser.id ? true : false;
+          userChatsData.chats[chatIndex].updatedAT = Date.now();
+
+          await updateDoc(userChatRef, {
+            chats: userChatsData.chats,
+          });
+        }
+      });
+    } catch (err) {
+      console.log(err);
+    }
   }
 
   return (
@@ -51,89 +95,15 @@ export default function Chat() {
         </div>
       </div>
       <div className="center">
-        <div className="message">
-          <img src="./avatar.png" alt="" />
-          <div className="texts">
-            <p>
-              Lorem, ipsum dolor sit amet consectetur adipisicing elit. Nihil
-              saepe suscipit, tenetur adipisci corporis minima atque
-              reprehenderit voluptatem deleniti veniam voluptatum velit debitis
-              sit nam cupiditate mollitia pariatur ad, et optio soluta dicta.
-              Rem facilis ut cum in mollitia voluptas.
-            </p>
-            <span>1 min ago</span>
+        {chat?.messages?.map((message) => (
+          <div className={message.senderId === currentUser?.id ? "message own" : "message"} key={message?.createAt}>
+            <div className="texts">
+              {message.img && <img src={message.img} alt="" />}
+              <p>{message.text}</p>
+              {/* <span>{message.createAt}</span> */}
+            </div>
           </div>
-        </div>
-        <div className="message own">
-          <div className="texts">
-            <p>
-              Lorem, ipsum dolor sit amet consectetur adipisicing elit. Nihil
-              saepe suscipit, tenetur adipisci corporis minima atque
-              reprehenderit voluptatem deleniti veniam voluptatum velit debitis
-              sit nam cupiditate mollitia pariatur ad, et optio soluta dicta.
-              Rem facilis ut cum in mollitia voluptas.
-            </p>
-            <span>1 min ago</span>
-          </div>
-        </div>
-        <div className="message">
-          <img src="./avatar.png" alt="" />
-          <div className="texts">
-            <p>
-              Lorem, ipsum dolor sit amet consectetur adipisicing elit. Nihil
-              saepe suscipit, tenetur adipisci corporis minima atque
-              reprehenderit voluptatem deleniti veniam voluptatum velit debitis
-              sit nam cupiditate mollitia pariatur ad, et optio soluta dicta.
-              Rem facilis ut cum in mollitia voluptas.
-            </p>
-            <span>1 min ago</span>
-          </div>
-        </div>
-        <div className="message own">
-          <div className="texts">
-            <p>
-              Lorem, ipsum dolor sit amet consectetur adipisicing elit. Nihil
-              saepe suscipit, tenetur adipisci corporis minima atque
-              reprehenderit voluptatem deleniti veniam voluptatum velit debitis
-              sit nam cupiditate mollitia pariatur ad, et optio soluta dicta.
-              Rem facilis ut cum in mollitia voluptas.
-            </p>
-            <span>1 min ago</span>
-          </div>
-        </div>
-        <div className="message">
-          <img src="./avatar.png" alt="" />
-          <div className="texts">
-            <img
-              src="https://images.pexels.com/photos/8364804/pexels-photo-8364804.jpeg?auto=compress&cs=tinysrgb&w=800&lazy=load"
-              alt=""
-            />
-            <p>
-              Lorem, ipsum dolor sit amet consectetur adipisicing elit. Nihil
-              saepe suscipit, tenetur adipisci corporis minima atque
-              reprehenderit voluptatem deleniti veniam voluptatum velit debitis
-              sit nam cupiditate mollitia pariatur ad, et optio soluta dicta.
-              Rem facilis ut cum in mollitia voluptas.
-            </p>
-            <span>1 min ago</span>
-          </div>
-        </div>
-        <div className="message own">
-          <div className="texts">
-            <img
-              src="https://images.pexels.com/photos/8364804/pexels-photo-8364804.jpeg?auto=compress&cs=tinysrgb&w=800&lazy=load"
-              alt=""
-            />
-            <p>
-              Lorem, ipsum dolor sit amet consectetur adipisicing elit. Nihil
-              saepe suscipit, tenetur adipisci corporis minima atque
-              reprehenderit voluptatem deleniti veniam voluptatum velit debitis
-              sit nam cupiditate mollitia pariatur ad, et optio soluta dicta.
-              Rem facilis ut cum in mollitia voluptas.
-            </p>
-            <span>1 min ago</span>
-          </div>
-        </div>
+        ))}
         <div ref={endRef}></div>
       </div>
       <div className="bottom">
@@ -163,7 +133,9 @@ export default function Chat() {
             />
           </div>
         </div>
-        <button className="sendButton">Send</button>
+        <button className="sendButton" onClick={handleSend}>
+          Send
+        </button>
       </div>
     </div>
   );
